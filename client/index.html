@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!--
+==============================================================================
+PURPOSE:
+- Defines the layout and user interface for the WebRTC Video Platform.
+- Focuses on a clean, professional dark-theme UI, optimized for usability.
+
+RESPONSIBILITIES:
+- Houses video containers for local and remote streams.
+- Provides room joining controls, connection status indicators, and call triggers.
+- Loads styling rules and client script sequentially.
+
+INTERACTIONS:
+- Called by: Nginx when browser requests http://localhost:3000.
+- Calls: client/css/style.css (formatting), client/js/app.js (interaction).
+
+INTERVIEW ARCHITECTURAL RATIONALE (SDE-1 DEFENSE):
+- Standard HTML5 architecture with semantic tagging (header, main, section, footer).
+- No UI abstractions (React/Vue/Angular) to avoid build tooling and keep code defendable.
+- Explicit status element to dynamically represent connection states (Disconnected, Connecting, etc.).
+==============================================================================
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production WebRTC Peer-to-Peer Stream</title>
+    <!-- Modern dark theme styling -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>WebRTC P2P Video Platform</h1>
+        <p class="app-subtitle">SDE-1 Reference Architecture • Secure Direct Media Streaming</p>
+    </header>
+
+    <main class="app-container">
+        <!-- Control and Configuration Panel -->
+        <section class="control-panel card">
+            <h2>Connection Controls</h2>
+            <div class="form-group">
+                <label for="roomIdInput">Room ID:</label>
+                <input type="text" id="roomIdInput" placeholder="Enter room name (e.g. room-101)" value="room-default">
+            </div>
+            
+            <div class="actions">
+                <button id="startBtn" class="btn btn-primary">1. Start Camera</button>
+                <button id="callBtn" class="btn btn-success" disabled>2. Connect Peer</button>
+            </div>
+
+            <!-- WebRTC Connection State Indicator -->
+            <div class="status-indicator">
+                <span>Connection Status:</span>
+                <span id="statusBadge" class="badge badge-disconnected">Disconnected</span>
+            </div>
+        </section>
+
+        <!-- Video Stream Containers -->
+        <section class="video-grid">
+            <div class="video-card card">
+                <h3>Local Stream (You)</h3>
+                <div class="video-wrapper">
+                    <!-- autoplay, playsinline, and muted are crucial for local loops to prevent audio feedback -->
+                    <video id="localVideo" autoplay playsinline muted></video>
+                </div>
+            </div>
+
+            <div class="video-card card">
+                <h3>Remote Stream (Peer)</h3>
+                <div class="video-wrapper">
+                    <!-- remote audio shouldn't be muted, but autoplay and playsinline are required -->
+                    <video id="remoteVideo" autoplay playsinline></video>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <p>Direct Browser-to-Browser Media. WebRTC signaling traffic is proxied through Nginx & Node.js.</p>
+    </footer>
+
+    <!-- Defer loading script until HTML structure is loaded -->
+    <script src="js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+# docker-compose.yml
+# ==============================================================================
+# PURPOSE:
+# - Orchestrates the building, configuration, and execution of the frontend web server (Nginx)
+#   and the backend WebSocket signaling server (Node.js).
+# 
+# RESPONSIBILITIES:
+# - Mounts local directories as volumes for hot-reloading static client files during development.
+# - Sets up a custom bridge network so containers can communicate using container name DNS.
+# - Maps container ports to host ports so users can access the application from the host browser.
+# 
+# INTERACTIONS:
+# - Used by: SDE-1 developer running `docker compose up --build`.
+# - Configures: 'signaling' and 'client' containers on 'webrtc-net' network.
+# 
+# INTERVIEW ARCHITECTURAL RATIONALE (SDE-1 DEFENSE):
+# 1. Why a custom bridge network (webrtc-net)?
+#    - Isolation and DNS. Default Docker networks do not allow container-name-to-IP resolution.
+#      A user-defined bridge network enables built-in Docker DNS so the 'client' container can resolve
+#      the hostname 'signaling' to route WS traffic. It also isolates these containers from other services.
+# 2. Why map port 3000:80 but NOT map 8080 to the host directly?
+#    - Security and Port Consolidation. Only Nginx (port 80 inside container, 3000 outside) is exposed.
+#      The signaling service (port 8080) is kept internal to the Docker network. The host cannot access
+#      8080 directly; instead, all traffic goes through Nginx on port 3000, which forwards requests
+#      internally to `http://signaling:8080`. This mimics a professional production DMZ setup.
+# 3. Simpler Alternative:
+#    - Map both ports 3000:80 and 8080:8080 to the host, and bypass Nginx proxying in the client (causes CORS, exposes raw ports).
+# 4. Production Alternative:
+#    - Deploying on AWS ECS/EKS with an Application Load Balancer (ALB) terminating HTTPS/WSS, routing
+#      traffic to target groups on private subnets.
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # Service 1: WebSocket Signaling Backend
+  signaling:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: signaling-backend
+    # Exposing the port is not strictly necessary for inter-container communication on a bridge network,
+    # but it serves as documentation of which port this service listens on.
+    expose:
+      - "8080"
+    networks:
+      - webrtc-net
+    restart: always
+
+  # Service 2: Nginx Web Server / Proxy Frontend
+  client:
+    image: nginx:alpine
+    container_name: nginx-frontend
+    ports:
+      - "3000:80" # Maps port 3000 on host to port 80 inside Nginx container
+    volumes:
+      # Mount client directory to serve files (HTML, CSS, JS)
+      - ./client:/usr/share/nginx/html:ro
+      # Mount custom Nginx config to replace default configuration
+      - ./client/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - webrtc-net
+    depends_on:
+      - signaling
+    restart: always
+
+# Define custom bridge network for inter-container communications
+networks:
+  webrtc-net:
+    driver: bridge

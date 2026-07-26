@@ -1,0 +1,13 @@
+# .dockerignore
+# ==============================================================================
+# Purpose: Prevent unnecessary local files from being sent to the Docker daemon.
+# Responsibilities: Excludes local node_modules, NPM logs, and Git files to speed up 
+#                   image building and prevent overwriting containerized dependencies.
+# Interactions: Read by the docker command during build.
+# ==============================================================================
+
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
