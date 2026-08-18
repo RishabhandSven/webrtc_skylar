@@ -60,7 +60,7 @@ http {
         # WebSockets require upgrading the connection headers.
         location /ws {
             # Route to the 'signaling' service defined in docker-compose
-            proxy_pass http://signaling:8080;
+            proxy_pass http://${SIGNALING_HOST}:8080;
 
             # HTTP 1.1 is required for WebSocket keep-alive and connections
             proxy_http_version 1.1;

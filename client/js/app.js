@@ -67,8 +67,8 @@ initializeWebSocket();
  */
 function initializeWebSocket() {
   // Construct dynamic WS URL. Nginx proxies '/ws' to signaling container on 8080.
-  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const wsUrl = `${protocol}//${window.location.host}/ws`;
 
   console.log(`[WebSocket] Connecting to signaling server at: ${wsUrl}`);
   ws = new WebSocket(wsUrl);
