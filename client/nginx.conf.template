@@ -46,7 +46,7 @@ http {
     error_log /var/log/nginx/error.log warn;
 
     server {
-        listen 80;
+        listen ${PORT};
         server_name localhost;
 
         # 1. Serve static frontend files

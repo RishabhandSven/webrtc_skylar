@@ -56,6 +56,7 @@ services:
     environment:
       - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx
       - SIGNALING_HOST=signaling
+      - PORT=80
     volumes:
       # Mount client directory to serve files (HTML, CSS, JS)
       - ./client:/usr/share/nginx/html:ro
